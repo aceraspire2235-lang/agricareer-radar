@@ -171,7 +171,9 @@ function loadJobs(){
   }
   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
   status.textContent='Loading live jobs…';
-  supabaseClient.from('jobs').select('id,title,company,location,job_type,field,salary,apply_url,source_url,description,eligibility,deadline').eq('is_active',true).order('created_at',{ascending:false})
+  supabaseClient.from('jobs').select('id,title,company,location,job_type,field,salary,apply_url,source_url,description,eligibility,deadline').eq('is_active', true)
+.or(`deadline.is.null,deadline.gte.${new Date().toISOString().slice(0, 10)}`)
+.order('created_at', { ascending: false })
     .then(function(result){
       if(result.error){console.error(result.error);status.textContent='Could not load jobs. Check the jobs table, field column and Row Level Security.';render();return;}
       JOBS=(result.data||[]).map(function(x){var j=[x.title||'Untitled role',x.company||'Employer not listed',x.location||'India',x.job_type||'Job',x.field||'Agriculture',x.salary||'Not specified'];j.id=x.id;j.apply_url=x.apply_url;j.source_url=x.source_url;j.description=x.description;j.eligibility=x.eligibility;j.deadline=x.deadline;return j;});
